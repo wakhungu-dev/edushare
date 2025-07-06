@@ -6,7 +6,7 @@ import {
   Text,
   Button,
   IconButton,
-  useColorMode,
+//   useColorMode,
   HStack,
   Avatar,
   Badge,
@@ -16,6 +16,8 @@ import {
   MenuItem
 } from '@chakra-ui/react'
 import { MoonIcon, SunIcon, BellIcon, ChevronDownIcon, SearchIcon } from '@chakra-ui/icons'
+import { useColorMode } from '../ui/color-mode';
+
 
 export default function Header() {
   const { colorMode, toggleColorMode } = useColorMode();
