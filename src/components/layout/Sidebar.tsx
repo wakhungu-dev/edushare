@@ -149,12 +149,12 @@ interface Category {
 }
 
 const categoryIcons: { [key: string]: React.ReactNode } = {
-  'programming': <Computer />,
+  'computer': <Computer />,
   'science': <Science />,
-  'mathematics': <School />,
-  'design': <Palette />,
+  'school': <School />,
+  'palette': <Palette />,
   'business': <Business />,
-  'languages': <Language />,
+  'language': <Language />,
   'psychology': <Psychology />,
   'engineering': <Engineering />,
 };
@@ -171,28 +171,28 @@ export default function Sidebar() {
     categories: false,
     discover: false,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadCategories();
-    loadPlatformStats();
+    loadData();
   }, []);
 
-  const loadCategories = async () => {
+  const loadData = async () => {
     try {
-      const { data, error } = await categoryService.getCategoriesWithCount();
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
-  };
+      const [categoriesResult, statsResult] = await Promise.all([
+        categoryService.getCategoriesWithCount(),
+        statsService.getPlatformStats()
+      ]);
 
-  const loadPlatformStats = async () => {
-    try {
-      const stats = await statsService.getPlatformStats();
-      setPlatformStats(stats);
+      if (categoriesResult.data) {
+        setCategories(categoriesResult.data);
+      }
+      
+      setPlatformStats(statsResult);
     } catch (error) {
-      console.error('Error loading platform stats:', error);
+      console.error('Error loading sidebar data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -247,7 +247,7 @@ export default function Sidebar() {
           label="Browse Resources" 
           path="/resources"
           isActive={pathname === '/resources'}
-          badge={formatNumber(platformStats.totalResources)}
+          badge={loading ? '...' : formatNumber(platformStats.totalResources)}
         />
         <SidebarItem 
           icon={<Favorite />} 
@@ -286,16 +286,23 @@ export default function Sidebar() {
           isExpanded={expandedSections.categories}
           onToggle={() => toggleSection('categories')}
         >
-          {categories.map((category) => (
+          {loading ? (
             <SidebarItem
-              key={category.id}
-              icon={categoryIcons[category.icon] || <LibraryBooks />}
-              label={category.name}
-              path={`/resources?category=${category.id}`}
-              isActive={pathname === `/resources` && new URLSearchParams(window.location.search).get('category') === category.id}
-              badge={category.resource_count}
+              icon={<LibraryBooks />}
+              label="Loading..."
             />
-          ))}
+          ) : (
+            categories.map((category) => (
+              <SidebarItem
+                key={category.id}
+                icon={categoryIcons[category.icon] || <LibraryBooks />}
+                label={category.name}
+                path={`/resources?category=${category.id}`}
+                isActive={pathname === `/resources` && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('category') === category.id}
+                badge={category.resource_count}
+              />
+            ))
+          )}
         </SidebarItem>
 
         <Divider sx={{ my: 2 }} />
@@ -327,7 +334,7 @@ export default function Sidebar() {
           label="Community" 
           path="/community"
           isActive={pathname === '/community'}
-          badge={formatNumber(platformStats.totalUsers)}
+          badge={loading ? '...' : formatNumber(platformStats.totalUsers)}
         />
 
         <Divider sx={{ my: 2 }} />

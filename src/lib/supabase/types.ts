@@ -34,6 +34,7 @@ export interface Category {
   icon: string;
   color: string;
   parent_id?: string;
+  resource_count?: number;
   created_at: string;
 }
 
@@ -54,4 +55,11 @@ export interface UserStats {
   karma_points: number;
   collections_count: number;
   favorites_count: number;
+}
+
+export interface PlatformStats {
+  totalResources: number;
+  totalUsers: number;
+  totalDownloads: number;
+  totalViews: number;
 }

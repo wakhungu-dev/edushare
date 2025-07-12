@@ -1,9 +1,9 @@
 import { supabase } from './client';
-import { UserStats } from './types';
+import { UserStats, PlatformStats } from './types';
 
 export const statsService = {
   // Get platform stats
-  async getPlatformStats() {
+  async getPlatformStats(): Promise<PlatformStats> {
     const [
       { count: totalResources },
       { count: totalUsers },
