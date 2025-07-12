@@ -1,25 +1,27 @@
 'use client';
 
+import React from 'react';
 import {
+  Card,
+  CardContent,
+  Typography,
+  Chip,
   Box,
-  Text,
-  Badge,
-  Flex,
   Avatar,
-  HStack,
-  VStack,
-  Icon,
-  useColorMode,
+  IconButton,
   Button,
-  IconButton
-} from '@chakra-ui/react';
-import { 
-  HeartIcon, 
-  BookmarkIcon, 
-  EyeIcon,
-  ArrowDownTrayIcon 
-} from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+  useTheme,
+  alpha
+} from '@mui/material';
+import {
+  Favorite,
+  FavoriteBorder,
+  Bookmark,
+  BookmarkBorder,
+  Visibility,
+  Download,
+  GetApp
+} from '@mui/icons-material';
 
 interface ResourceCardProps {
   title: string;
@@ -50,119 +52,147 @@ export default function ResourceCard({
   isBookmarked = false,
   uploadDate
 }: ResourceCardProps) {
-  const { colorMode } = useColorMode();
+  const theme = useTheme();
 
   return (
-    <Box
-      bg={colorMode === 'light' ? 'white' : 'gray.800'}
-      borderRadius="xl"
-      border="1px"
-      borderColor={colorMode === 'light' ? 'gray.200' : 'gray.700'}
-      p={6}
-      cursor="pointer"
-      transition="all 0.2s"
-      _hover={{
-        transform: 'translateY(-2px)',
-        shadow: 'lg',
-        borderColor: colorMode === 'light' ? 'gray.300' : 'gray.600'
+    <Card
+      sx={{
+        borderRadius: 3,
+        border: `1px solid ${theme.palette.divider}`,
+        cursor: 'pointer',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: theme.shadows[8],
+          borderColor: alpha(theme.palette.primary.main, 0.3),
+        },
       }}
     >
-      <VStack align="stretch" spacing={4}>
-        {/* Header */}
-        <Flex justify="space-between" align="start">
-          <Badge colorScheme="blue" borderRadius="full" px={3} py={1}>
-            {category}
-          </Badge>
-          <HStack spacing={2}>
-            <IconButton
-              aria-label="Bookmark"
-              icon={<BookmarkIcon />}
-              size="sm"
-              variant="ghost"
-              color={isBookmarked ? 'blue.500' : 'gray.400'}
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {/* Header */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Chip
+              label={category}
+              color="primary"
+              size="small"
+              sx={{ borderRadius: 2 }}
             />
-            <IconButton
-              aria-label="Like"
-              icon={isLiked ? <HeartSolidIcon /> : <HeartIcon />}
-              size="sm"
-              variant="ghost"
-              color={isLiked ? 'red.500' : 'gray.400'}
-            />
-          </HStack>
-        </Flex>
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              <IconButton
+                size="small"
+                sx={{ color: isBookmarked ? theme.palette.primary.main : theme.palette.text.secondary }}
+              >
+                {isBookmarked ? <Bookmark /> : <BookmarkBorder />}
+              </IconButton>
+              <IconButton
+                size="small"
+                sx={{ color: isLiked ? theme.palette.error.main : theme.palette.text.secondary }}
+              >
+                {isLiked ? <Favorite /> : <FavoriteBorder />}
+              </IconButton>
+            </Box>
+          </Box>
 
-        {/* Content */}
-        <VStack align="stretch" spacing={3}>
-          <Text fontSize="lg" fontWeight="bold" lineHeight="short">
-            {title}
-          </Text>
-          <Text 
-            fontSize="sm" 
-            color={colorMode === 'light' ? 'gray.600' : 'gray.400'}
-            lineHeight="base"
-            noOfLines={2}
-          >
-            {description}
-          </Text>
-        </VStack>
-
-        {/* Tags */}
-        <Flex wrap="wrap" gap={2}>
-          {tags.map((tag, index) => (
-            <Badge
-              key={index}
-              variant="subtle"
-              colorScheme="gray"
-              fontSize="xs"
-              borderRadius="full"
-              px={2}
-              py={1}
+          {/* Content */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 'bold',
+                lineHeight: 1.3,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
             >
-              {tag}
-            </Badge>
-          ))}
-        </Flex>
+              {title}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: theme.palette.text.secondary,
+                lineHeight: 1.5,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {description}
+            </Typography>
+          </Box>
 
-        {/* Footer */}
-        <Flex justify="space-between" align="center" pt={2}>
-          <HStack spacing={3}>
-            <Avatar size="xs" name={author} src={authorAvatar} />
-            <VStack align="start" spacing={0}>
-              <Text fontSize="xs" fontWeight="medium">
-                {author}
-              </Text>
-              <Text fontSize="xs" color="gray.500">
-                {uploadDate}
-              </Text>
-            </VStack>
-          </HStack>
+          {/* Tags */}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {tags.map((tag, index) => (
+              <Chip
+                key={index}
+                label={tag}
+                variant="outlined"
+                size="small"
+                sx={{
+                  fontSize: '0.75rem',
+                  height: 24,
+                  borderRadius: 2,
+                  backgroundColor: alpha(theme.palette.text.secondary, 0.05),
+                  borderColor: alpha(theme.palette.text.secondary, 0.2),
+                }}
+              />
+            ))}
+          </Box>
 
-          <HStack spacing={4} fontSize="xs" color="gray.500">
-            <HStack spacing={1}>
-              <Icon as={EyeIcon} boxSize={3} />
-              <Text>{views}</Text>
-            </HStack>
-            <HStack spacing={1}>
-              <Icon as={HeartIcon} boxSize={3} />
-              <Text>{likes}</Text>
-            </HStack>
-            <HStack spacing={1}>
-              <Icon as={ArrowDownTrayIcon} boxSize={3} />
-              <Text>{downloads}</Text>
-            </HStack>
-          </HStack>
-        </Flex>
+          {/* Footer */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Avatar
+                src={authorAvatar}
+                sx={{ width: 24, height: 24 }}
+              >
+                {author.charAt(0)}
+              </Avatar>
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 500, display: 'block' }}>
+                  {author}
+                </Typography>
+                <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
+                  {uploadDate}
+                </Typography>
+              </Box>
+            </Box>
 
-        {/* Action Button */}
-        <Button
-          colorScheme="blue"
-          size="sm"
-          borderRadius="lg"
-          leftIcon={<ArrowDownTrayIcon width={16} height={16} />}
-        >
-          Download Resource
-        </Button>
-      </VStack>
-    </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Visibility sx={{ fontSize: 14 }} />
+                <Typography variant="caption">{views}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Favorite sx={{ fontSize: 14 }} />
+                <Typography variant="caption">{likes}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Download sx={{ fontSize: 14 }} />
+                <Typography variant="caption">{downloads}</Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Action Button */}
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<GetApp />}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Download Resource
+          </Button>
+        </Box>
+      </CardContent>
+    </Card>
   );
 }

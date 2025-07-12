@@ -1,110 +1,172 @@
 'use client';
 
-import { Box, Flex, Text, Button, Avatar, Menu, MenuButton, MenuList, MenuItem, IconButton, useColorMode, HStack, Badge } from '@chakra-ui/react';
-import { ChevronDownIcon, MoonIcon, SunIcon, BellIcon, SearchIcon } from '@chakra-ui/icons';
+import React from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  Typography,
+  TextField,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  Badge,
+  Button,
+  InputAdornment,
+  useTheme,
+  alpha
+} from '@mui/material';
+import {
+  Search,
+  Notifications,
+  DarkMode,
+  LightMode,
+  KeyboardArrowDown,
+  Upload
+} from '@mui/icons-material';
+import { useTheme as useNextTheme } from 'next-themes';
+import { useState } from 'react';
 
 export default function Header() {
-  const { colorMode, toggleColorMode } = useColorMode();
+  const theme = useTheme();
+  const { theme: currentTheme, setTheme } = useNextTheme();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const toggleTheme = () => {
+    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
-    <Box 
-      as="header" 
-      bg={colorMode === 'light' ? 'white' : 'gray.800'} 
-      borderBottom="1px" 
-      borderColor={colorMode === 'light' ? 'gray.200' : 'gray.700'}
-      px={6} 
-      py={4}
-      position="sticky"
-      top={0}
-      zIndex={1000}
-      backdropFilter="blur(10px)"
-      bg={colorMode === 'light' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(26, 32, 44, 0.8)'}
+    <AppBar 
+      position="sticky" 
+      elevation={0}
+      sx={{
+        backgroundColor: alpha(theme.palette.background.paper, 0.8),
+        backdropFilter: 'blur(10px)',
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        color: theme.palette.text.primary,
+      }}
     >
-      <Flex justify="space-between" align="center" maxW="7xl" mx="auto">
+      <Toolbar sx={{ justifyContent: 'space-between', maxWidth: '7xl', width: '100%', mx: 'auto', px: 3 }}>
         {/* Logo */}
-        <Flex align="center" gap={3}>
-          <Box 
-            w={8} 
-            h={8} 
-            bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" 
-            borderRadius="md"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            <Text color="white" fontWeight="bold" fontSize="sm">ES</Text>
+            <Typography variant="body2" sx={{ color: 'white', fontWeight: 'bold' }}>
+              ES
+            </Typography>
           </Box>
-          <Text fontSize="xl" fontWeight="bold" color={colorMode === 'light' ? 'gray.800' : 'white'}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
             EduShare Hub
-          </Text>
-        </Flex>
+          </Typography>
+        </Box>
 
         {/* Search Bar */}
-        <Flex 
-          flex={1} 
-          maxW="md" 
-          mx={8}
-          bg={colorMode === 'light' ? 'gray.50' : 'gray.700'}
-          borderRadius="lg"
-          align="center"
-          px={4}
-          py={2}
-        >
-          <SearchIcon color="gray.400" mr={3} />
-          <Text color="gray.400" fontSize="sm">Search resources, notes, books...</Text>
-        </Flex>
+        <Box sx={{ flex: 1, maxWidth: 'md', mx: 4 }}>
+          <TextField
+            fullWidth
+            placeholder="Search resources, notes, books..."
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: theme.palette.text.secondary }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: alpha(theme.palette.action.hover, 0.5),
+                borderRadius: 2,
+                '& fieldset': {
+                  border: 'none',
+                },
+                '&:hover fieldset': {
+                  border: 'none',
+                },
+                '&.Mui-focused fieldset': {
+                  border: `1px solid ${theme.palette.primary.main}`,
+                },
+              },
+            }}
+          />
+        </Box>
 
         {/* Right Side */}
-        <HStack spacing={4}>
-          <IconButton
-            aria-label="Toggle color mode"
-            icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
-            onClick={toggleColorMode}
-            variant="ghost"
-            size="sm"
-          />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton onClick={toggleTheme} size="small">
+            {currentTheme === 'dark' ? <LightMode /> : <DarkMode />}
+          </IconButton>
           
-          <Box position="relative">
-            <IconButton
-              aria-label="Notifications"
-              icon={<BellIcon />}
-              variant="ghost"
-              size="sm"
-            />
-            <Badge
-              position="absolute"
-              top="-1"
-              right="-1"
-              colorScheme="red"
-              borderRadius="full"
-              boxSize="18px"
-              fontSize="10px"
-            >
-              3
+          <IconButton size="small">
+            <Badge badgeContent={3} color="error">
+              <Notifications />
             </Badge>
-          </Box>
+          </IconButton>
 
-          <Button colorScheme="blue" size="sm" borderRadius="lg">
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<Upload />}
+            sx={{ borderRadius: 2, textTransform: 'none' }}
+          >
             Upload Resource
           </Button>
 
-          <Menu>
-            <MenuButton as={Button} variant="ghost" size="sm" rightIcon={<ChevronDownIcon />}>
-              <HStack spacing={2}>
-                <Avatar size="sm" name="Student User" src="" />
-                <Text fontSize="sm">Student</Text>
-              </HStack>
-            </MenuButton>
-            <MenuList>
-              <MenuItem>Profile</MenuItem>
-              <MenuItem>My Resources</MenuItem>
-              <MenuItem>Collections</MenuItem>
-              <MenuItem>Settings</MenuItem>
-              <MenuItem>Sign Out</MenuItem>
-            </MenuList>
+          <Button
+            onClick={handleMenuOpen}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              textTransform: 'none',
+              color: theme.palette.text.primary,
+            }}
+            endIcon={<KeyboardArrowDown />}
+          >
+            <Avatar sx={{ width: 32, height: 32 }} />
+            <Typography variant="body2">Student</Typography>
+          </Button>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+            <MenuItem onClick={handleMenuClose}>My Resources</MenuItem>
+            <MenuItem onClick={handleMenuClose}>Collections</MenuItem>
+            <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
+            <MenuItem onClick={handleMenuClose}>Sign Out</MenuItem>
           </Menu>
-        </HStack>
-      </Flex>
-    </Box>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }
