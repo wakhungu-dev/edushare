@@ -1,106 +1,365 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
-  VStack, 
-  Text, 
-  Icon, 
-  Flex, 
-  useColorMode,
+  List, 
+  ListItem, 
+  ListItemButton, 
+  ListItemIcon, 
+  ListItemText,
+  Typography,
+  Divider,
   Badge,
-  Divider
-} from '@chakra-ui/react';
-import { 
-  HomeIcon, 
-  BookOpenIcon, 
-  StarIcon, 
-  CollectionIcon,
-  TrendingUpIcon,
-  UserGroupIcon,
-  CogIcon,
-  QuestionMarkCircleIcon
-} from '@heroicons/react/24/outline';
+  Collapse,
+  IconButton,
+  useTheme,
+  alpha
+} from '@mui/material';
+import {
+  Home,
+  LibraryBooks,
+  Favorite,
+  Collections,
+  TrendingUp,
+  Group,
+  Settings,
+  HelpOutline,
+  ExpandLess,
+  ExpandMore,
+  School,
+  Science,
+  Computer,
+  Palette,
+  Business,
+  Language,
+  Psychology,
+  Engineering
+} from '@mui/icons-material';
+import { useRouter, usePathname } from 'next/navigation';
+import { categoryService } from '@/lib/supabase/categories';
+import { statsService } from '@/lib/supabase/stats';
 
 interface SidebarItemProps {
-  icon: any;
+  icon: React.ReactNode;
   label: string;
+  path?: string;
   isActive?: boolean;
-  badge?: string;
+  badge?: string | number;
+  onClick?: () => void;
+  children?: React.ReactNode;
+  hasSubmenu?: boolean;
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
-function SidebarItem({ icon, label, isActive = false, badge }: SidebarItemProps) {
-  const { colorMode } = useColorMode();
-  
+function SidebarItem({ 
+  icon, 
+  label, 
+  path, 
+  isActive = false, 
+  badge, 
+  onClick, 
+  children,
+  hasSubmenu = false,
+  isExpanded = false,
+  onToggle
+}: SidebarItemProps) {
+  const theme = useTheme();
+  const router = useRouter();
+
+  const handleClick = () => {
+    if (hasSubmenu && onToggle) {
+      onToggle();
+    } else if (path) {
+      router.push(path);
+    } else if (onClick) {
+      onClick();
+    }
+  };
+
   return (
-    <Flex
-      align="center"
-      px={3}
-      py={2.5}
-      borderRadius="lg"
-      cursor="pointer"
-      bg={isActive ? (colorMode === 'light' ? 'blue.50' : 'blue.900') : 'transparent'}
-      color={isActive ? 'blue.600' : (colorMode === 'light' ? 'gray.700' : 'gray.300')}
-      _hover={{
-        bg: colorMode === 'light' ? 'gray.50' : 'gray.700',
-        color: colorMode === 'light' ? 'gray.900' : 'white'
-      }}
-      transition="all 0.2s"
-      justify="space-between"
-      w="full"
-    >
-      <Flex align="center" gap={3}>
-        <Icon as={icon} boxSize={5} />
-        <Text fontSize="sm" fontWeight={isActive ? 'semibold' : 'medium'}>
-          {label}
-        </Text>
-      </Flex>
-      {badge && (
-        <Badge colorScheme="blue" size="sm" borderRadius="full">
-          {badge}
-        </Badge>
+    <>
+      <ListItem disablePadding>
+        <ListItemButton
+          onClick={handleClick}
+          sx={{
+            borderRadius: 2,
+            mb: 0.5,
+            backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+            color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+            '&:hover': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.05),
+            },
+            transition: 'all 0.2s ease-in-out',
+          }}
+        >
+          <ListItemIcon
+            sx={{
+              color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
+              minWidth: 40,
+            }}
+          >
+            {icon}
+          </ListItemIcon>
+          <ListItemText 
+            primary={label}
+            primaryTypographyProps={{
+              fontSize: '0.875rem',
+              fontWeight: isActive ? 600 : 500,
+            }}
+          />
+          {badge && (
+            <Badge 
+              badgeContent={badge} 
+              color="primary" 
+              sx={{ 
+                '& .MuiBadge-badge': { 
+                  fontSize: '0.75rem',
+                  height: 18,
+                  minWidth: 18,
+                }
+              }}
+            />
+          )}
+          {hasSubmenu && (
+            <IconButton size="small" sx={{ ml: 1 }}>
+              {isExpanded ? <ExpandLess /> : <ExpandMore />}
+            </IconButton>
+          )}
+        </ListItemButton>
+      </ListItem>
+      {hasSubmenu && (
+        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding sx={{ pl: 2 }}>
+            {children}
+          </List>
+        </Collapse>
       )}
-    </Flex>
+    </>
   );
 }
 
+interface Category {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  resource_count?: number;
+}
+
+const categoryIcons: { [key: string]: React.ReactNode } = {
+  'programming': <Computer />,
+  'science': <Science />,
+  'mathematics': <School />,
+  'design': <Palette />,
+  'business': <Business />,
+  'languages': <Language />,
+  'psychology': <Psychology />,
+  'engineering': <Engineering />,
+};
+
 export default function Sidebar() {
-  const { colorMode } = useColorMode();
+  const theme = useTheme();
+  const pathname = usePathname();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [platformStats, setPlatformStats] = useState({
+    totalResources: 0,
+    totalUsers: 0,
+  });
+  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
+    categories: false,
+    discover: false,
+  });
+
+  useEffect(() => {
+    loadCategories();
+    loadPlatformStats();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await categoryService.getCategoriesWithCount();
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  const loadPlatformStats = async () => {
+    try {
+      const stats = await statsService.getPlatformStats();
+      setPlatformStats(stats);
+    } catch (error) {
+      console.error('Error loading platform stats:', error);
+    }
+  };
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}k`;
+    }
+    return num.toString();
+  };
 
   return (
     <Box
-      as="nav"
-      w="64"
-      h="calc(100vh - 80px)"
-      bg={colorMode === 'light' ? 'white' : 'gray.800'}
-      borderRight="1px"
-      borderColor={colorMode === 'light' ? 'gray.200' : 'gray.700'}
-      p={4}
-      position="sticky"
-      top="80px"
-      overflowY="auto"
+      component="nav"
+      sx={{
+        width: 280,
+        height: 'calc(100vh - 80px)',
+        backgroundColor: theme.palette.background.paper,
+        borderRight: `1px solid ${theme.palette.divider}`,
+        position: 'sticky',
+        top: 80,
+        overflowY: 'auto',
+        p: 2,
+        '&::-webkit-scrollbar': {
+          width: 6,
+        },
+        '&::-webkit-scrollbar-track': {
+          backgroundColor: 'transparent',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: alpha(theme.palette.text.secondary, 0.2),
+          borderRadius: 3,
+        },
+      }}
     >
-      <VStack spacing={1} align="stretch">
-        <SidebarItem icon={HomeIcon} label="Dashboard" isActive />
-        <SidebarItem icon={BookOpenIcon} label="Browse Resources" badge="2.1k" />
-        <SidebarItem icon={StarIcon} label="My Favorites" />
-        <SidebarItem icon={CollectionIcon} label="Collections" badge="5" />
+      <List component="nav" disablePadding>
+        {/* Main Navigation */}
+        <SidebarItem 
+          icon={<Home />} 
+          label="Dashboard" 
+          path="/"
+          isActive={pathname === '/'} 
+        />
+        <SidebarItem 
+          icon={<LibraryBooks />} 
+          label="Browse Resources" 
+          path="/resources"
+          isActive={pathname === '/resources'}
+          badge={formatNumber(platformStats.totalResources)}
+        />
+        <SidebarItem 
+          icon={<Favorite />} 
+          label="My Favorites" 
+          path="/favorites"
+          isActive={pathname === '/favorites'}
+        />
+        <SidebarItem 
+          icon={<Collections />} 
+          label="Collections" 
+          path="/collections"
+          isActive={pathname === '/collections'}
+        />
+
+        <Divider sx={{ my: 2 }} />
+
+        {/* Categories Section */}
+        <Typography 
+          variant="overline" 
+          sx={{ 
+            px: 2, 
+            py: 1, 
+            color: theme.palette.text.secondary,
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            letterSpacing: 1,
+          }}
+        >
+          Categories
+        </Typography>
         
-        <Divider my={4} />
+        <SidebarItem
+          icon={<LibraryBooks />}
+          label="All Categories"
+          hasSubmenu
+          isExpanded={expandedSections.categories}
+          onToggle={() => toggleSection('categories')}
+        >
+          {categories.map((category) => (
+            <SidebarItem
+              key={category.id}
+              icon={categoryIcons[category.icon] || <LibraryBooks />}
+              label={category.name}
+              path={`/resources?category=${category.id}`}
+              isActive={pathname === `/resources` && new URLSearchParams(window.location.search).get('category') === category.id}
+              badge={category.resource_count}
+            />
+          ))}
+        </SidebarItem>
+
+        <Divider sx={{ my: 2 }} />
+
+        {/* Discover Section */}
+        <Typography 
+          variant="overline" 
+          sx={{ 
+            px: 2, 
+            py: 1, 
+            color: theme.palette.text.secondary,
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            letterSpacing: 1,
+          }}
+        >
+          Discover
+        </Typography>
         
-        <Text fontSize="xs" fontWeight="semibold" color="gray.500" px={3} mb={2}>
-          DISCOVER
-        </Text>
-        <SidebarItem icon={TrendingUpIcon} label="Trending" badge="Hot" />
-        <SidebarItem icon={UserGroupIcon} label="Community" />
+        <SidebarItem 
+          icon={<TrendingUp />} 
+          label="Trending" 
+          path="/trending"
+          isActive={pathname === '/trending'}
+          badge="Hot"
+        />
+        <SidebarItem 
+          icon={<Group />} 
+          label="Community" 
+          path="/community"
+          isActive={pathname === '/community'}
+          badge={formatNumber(platformStats.totalUsers)}
+        />
+
+        <Divider sx={{ my: 2 }} />
+
+        {/* Account Section */}
+        <Typography 
+          variant="overline" 
+          sx={{ 
+            px: 2, 
+            py: 1, 
+            color: theme.palette.text.secondary,
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            letterSpacing: 1,
+          }}
+        >
+          Account
+        </Typography>
         
-        <Divider my={4} />
-        
-        <Text fontSize="xs" fontWeight="semibold" color="gray.500" px={3} mb={2}>
-          ACCOUNT
-        </Text>
-        <SidebarItem icon={CogIcon} label="Settings" />
-        <SidebarItem icon={QuestionMarkCircleIcon} label="Help & Support" />
-      </VStack>
+        <SidebarItem 
+          icon={<Settings />} 
+          label="Settings" 
+          path="/settings"
+          isActive={pathname === '/settings'}
+        />
+        <SidebarItem 
+          icon={<HelpOutline />} 
+          label="Help & Support" 
+          path="/help"
+          isActive={pathname === '/help'}
+        />
+      </List>
     </Box>
   );
 }
