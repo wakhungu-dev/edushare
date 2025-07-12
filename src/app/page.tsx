@@ -1,29 +1,17 @@
 'use client';
 
-import { 
-  Box, 
-  Container, 
-  // Grid, 
-  // GridItem, 
-  Text, 
-  VStack, 
-  // HStack,
-  SimpleGrid,
-  Flex,
-  Button,
-  // useColorMode
-} from '@chakra-ui/react';
-import { useColorMode } from '@/components/ui/color-mode';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
+import { FaBookOpen, FaUsers, FaArrowDown, FaStar } from 'react-icons/fa';
 import Header from '@/components/layout/Header';
-import Sidebar from '@/components/layout/Sidebar';
+// import Sidebar from '@/components/layout/Sidebar';
 import ResourceCard from '@/components/ui/ResourceCard';
 import StatsCard from '@/components/ui/StatsCard';
-import { 
-  BookOpenIcon, 
-  UsersIcon, 
-  ArrowDownTrayIcon,
-  StarIcon 
-} from '@heroicons/react/24/outline';
 
 // Sample data
 const sampleResources = [
@@ -76,96 +64,108 @@ const sampleResources = [
 ];
 
 export default function Home() {
-  const { colorMode } = useColorMode();
-
   return (
-    <Box minH="100vh" bg={colorMode === 'light' ? 'gray.50' : 'gray.900'}>
+    <Box minHeight="100vh" bgcolor="grey.100">
       <Header />
-      
-      <Flex>
-        <Sidebar />
-        
-        <Box flex={1} p={8}>
-          <Container maxW="6xl">
-            <VStack gap={8} align="stretch">
+
+      <Box display="flex">
+        {/* <Sidebar /> */}
+
+        <Box flex={1} p={4}>
+          <Container maxWidth="lg">
+            <Stack spacing={4}>
               {/* Welcome Section */}
-              <Box>
-                <Text fontSize="2xl" fontWeight="bold" mb={2}>
+              <Paper elevation={0} sx={{ p: 3, mb: 2, bgcolor: 'background.paper' }}>
+                <Typography variant="h4" fontWeight="bold" gutterBottom>
                   Welcome back, Student! 👋
-                </Text>
-                <Text color="gray.600" fontSize="lg">
+                </Typography>
+                <Typography color="text.secondary" variant="h6">
                   Discover and share amazing learning resources with the community
-                </Text>
-              </Box>
+                </Typography>
+              </Paper>
 
               {/* Stats Cards */}
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={6}>
-                <StatsCard
-                  title="Total Resources"
-                  value="2,847"
-                  icon={BookOpenIcon}
-                  change="12%"
-                  changeType="increase"
-                  color="blue"
-                />
-                <StatsCard
-                  title="Active Users"
-                  value="1,234"
-                  icon={UsersIcon}
-                  change="8%"
-                  changeType="increase"
-                  color="green"
-                />
-                <StatsCard
-                  title="Downloads Today"
-                  value="456"
-                  icon={ArrowDownTrayIcon}
-                  change="23%"
-                  changeType="increase"
-                  color="purple"
-                />
-                <StatsCard
-                  title="Your Karma"
-                  value="892"
-                  icon={StarIcon}
-                  change="5%"
-                  changeType="increase"
-                  color="orange"
-                />
-              </SimpleGrid>
+              <Grid container gap={3}>
+                <Grid item xs={12} md={3}>
+                  <StatsCard
+                    title="Total Resources"
+                    value="2,847"
+                    icon={FaBookOpen}
+                    change="12%"
+                    changeType="increase"
+                    color="primary"
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <StatsCard
+                    title="Active Users"
+                    value="1,234"
+                    icon={FaUsers}
+                    change="8%"
+                    changeType="increase"
+                    color="success"
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <StatsCard
+                    title="Downloads Today"
+                    value="456"
+                    icon={FaArrowDown}
+                    change="23%"
+                    changeType="increase"
+                    color="secondary"
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <StatsCard
+                    title="Your Karma"
+                    value="892"
+                    icon={FaStar}
+                    change="5%"
+                    changeType="increase"
+                    color="warning"
+                  />
+                </Grid>
+              </Grid>
 
               {/* Section Header */}
-              <Flex justify="space-between" align="center">
+              <Box display="flex" justifyContent="space-between" alignItems="center" mt={4}>
                 <Box>
-                  <Text fontSize="xl" fontWeight="bold">
+                  <Typography variant="h6" fontWeight="bold">
                     Trending Resources
-                  </Text>
-                  <Text color="gray.600" fontSize="sm">
+                  </Typography>
+                  <Typography color="text.secondary" variant="body2">
                     Most popular resources this week
-                  </Text>
+                  </Typography>
                 </Box>
-                <Button variant="ghost" size="sm">
+                <Button variant="text" size="small">
                   View All
                 </Button>
-              </Flex>
+              </Box>
 
               {/* Resources Grid */}
-              <SimpleGrid columns={{ base: 1, lg: 2 }} gap={6}>
+              <Grid container spacing={3}>
                 {sampleResources.map((resource, index) => (
-                  <ResourceCard key={index} {...resource} />
+                  <Grid item xs={12} lg={6} key={index}>
+                    <ResourceCard
+                      {...resource}
+                      isLiked={resource.isLiked ?? false}
+                      isBookmarked={resource.isBookmarked ?? false}
+                    />
+                  </Grid>
                 ))}
-              </SimpleGrid>
+              </Grid>
 
               {/* Load More */}
-              <Flex justify="center" pt={4}>
-                <Button colorScheme="blue" size="lg" borderRadius="xl">
+              <Box display="flex" justifyContent="center" pt={2}>
+                <Button variant="contained" color="primary" size="large" sx={{ borderRadius: 3 }}>
                   Load More Resources
                 </Button>
-              </Flex>
-            </VStack>
+              </Box>
+            </Stack>
           </Container>
         </Box>
-      </Flex>
+      </Box>
     </Box>
   );
 }

@@ -1,125 +1,104 @@
 'use client';
 
-import {
-  Box,
-  Flex,
-  Text,
-  Button,
-  IconButton,
-//   useColorMode,
-  HStack,
-  Avatar,
-  Badge,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem
-} from '@chakra-ui/react'
-import { MoonIcon, SunIcon, BellIcon, ChevronDownIcon, SearchIcon } from '@chakra-ui/icons'
-import { useColorMode } from '../ui/color-mode';
-
+import { useState } from 'react';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Badge from '@mui/material/Badge';
+import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import { FaMoon, FaSun, FaBell, FaChevronDown, FaSearch } from 'react-icons/fa';
 
 export default function Header() {
-  const { colorMode, toggleColorMode } = useColorMode();
+  const [darkMode, setDarkMode] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleToggleDarkMode = () => setDarkMode((prev) => !prev);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
 
   return (
-    <Box 
-      as="header" 
-      borderBottom="1px" 
-      borderColor={colorMode === 'light' ? 'gray.200' : 'gray.700'}
-      px={6} 
-      py={4}
+    <AppBar
       position="sticky"
-      top={0}
-      zIndex={1000}
-      backdropFilter="blur(10px)"
-      bg={colorMode === 'light' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(26, 32, 44, 0.8)'}
+      color={darkMode ? 'default' : 'primary'}
+      sx={{
+        bgcolor: darkMode ? 'grey.900' : 'primary.main',
+        color: darkMode ? 'grey.100' : 'inherit',
+        boxShadow: 2,
+      }}
     >
-      <Flex justify="space-between" align="center" maxW="7xl" mx="auto">
-        {/* Logo */}
-        <Flex align="center" gap={3}>
-          <Box 
-            w={8} 
-            h={8} 
-            bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" 
-            borderRadius="md"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text color="white" fontWeight="bold" fontSize="sm">ES</Text>
-          </Box>
-          <Text fontSize="xl" fontWeight="bold" color={colorMode === 'light' ? 'gray.800' : 'white'}>
-            EduShare Hub
-          </Text>
-        </Flex>
+      <Toolbar>
+        <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
+          <MenuIcon />
+        </IconButton>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          EduShare Hub
+        </Typography>
 
         {/* Search Bar */}
-        <Flex 
-          flex={1} 
-          maxW="md" 
-          mx={8}
-          bg={colorMode === 'light' ? 'gray.50' : 'gray.700'}
-          borderRadius="lg"
-          align="center"
-          px={4}
-          py={2}
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            alignItems: 'center',
+            bgcolor: darkMode ? 'grey.800' : 'grey.100',
+            borderRadius: 2,
+            px: 2,
+            py: 1,
+            mx: 3,
+            minWidth: 280,
+          }}
         >
-          <SearchIcon color="gray.400" mr={3} />
-          <Text color="gray.400" fontSize="sm">Search resources, notes, books...</Text>
-        </Flex>
+          <FaSearch color={darkMode ? '#bbb' : '#888'} style={{ marginRight: 8 }} />
+          <Typography variant="body2" color="text.secondary">
+            Search resources, notes, books...
+          </Typography>
+        </Box>
 
         {/* Right Side */}
-        <HStack spacing={4}>
-          <IconButton
-            aria-label="Toggle color mode"
-            icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
-            onClick={toggleColorMode}
-            variant="ghost"
-            size="sm"
-          />
-          
-          <Box position="relative">
-            <IconButton
-              aria-label="Notifications"
-              icon={<BellIcon />}
-              variant="ghost"
-              size="sm"
-            />
-            <Badge
-              position="absolute"
-              top="-1"
-              right="-1"
-              colorScheme="red"
-              borderRadius="full"
-              boxSize="18px"
-              fontSize="10px"
-            >
-              3
+        <Stack direction="row" spacing={2} alignItems="center">
+          <IconButton color="inherit" onClick={handleToggleDarkMode}>
+            {darkMode ? <FaSun /> : <FaMoon />}
+          </IconButton>
+          <IconButton color="inherit">
+            <Badge badgeContent={3} color="error">
+              <FaBell />
             </Badge>
-          </Box>
-
-          <Button colorScheme="blue" size="sm" borderRadius="lg">
+          </IconButton>
+          <Button variant="contained" color="secondary" size="small" sx={{ borderRadius: 2 }}>
             Upload Resource
           </Button>
-
-          <Menu>
-            <MenuButton as={Button} variant="ghost" size="sm" rightIcon={<ChevronDownIcon />}>
-              {/* <HStack spacing={2}> */}
-                {/* <Avatar size="sm" name="Student User" src="" /> */}
-                <Text fontSize="sm">Student</Text>
-              {/* </HStack> */}
-            </MenuButton>
-            <MenuList>
-              <MenuItem value="profile">Profile</MenuItem>
-              <MenuItem value="resources">My Resources</MenuItem>
-              <MenuItem value="collections">Collections</MenuItem>
-              <MenuItem value="settings">Settings</MenuItem>
-              <MenuItem value="signout">Sign Out</MenuItem>
-            </MenuList>
-          </Menu>
-        </HStack>
-      </Flex>
-    </Box>
+          <Box>
+            <Button
+              color="inherit"
+              startIcon={<Avatar sx={{ width: 28, height: 28 }} />}
+              endIcon={<FaChevronDown />}
+              onClick={handleMenuOpen}
+              sx={{ textTransform: 'none', borderRadius: 2 }}
+            >
+              Student
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+              <MenuItem onClick={handleMenuClose}>My Resources</MenuItem>
+              <MenuItem onClick={handleMenuClose}>Collections</MenuItem>
+              <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
+              <MenuItem onClick={handleMenuClose}>Sign Out</MenuItem>
+            </Menu>
+          </Box>
+        </Stack>
+      </Toolbar>
+    </AppBar>
   );
 }

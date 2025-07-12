@@ -1,27 +1,14 @@
 'use client';
 
-import {
-  Box,
-  Text,
-  Badge,
-  Flex,
-  Avatar,
-  HStack,
-  VStack,
-  Icon,
-//   useColorMode,
-  Button,
-  IconButton,
-  // Square,
-} from '@chakra-ui/react';
-import { 
-  HeartIcon, 
-  BookmarkIcon, 
-  EyeIcon,
-  ArrowDownTrayIcon 
-} from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-import { useColorMode } from './color-mode';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Chip from '@mui/material/Chip';
+import Avatar from '@mui/material/Avatar';
+import Stack from '@mui/material/Stack';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import { FaRegHeart, FaHeart, FaRegBookmark, FaBookmark, FaEye, FaArrowDown } from 'react-icons/fa';
 
 interface ResourceCardProps {
   title: string;
@@ -52,119 +39,103 @@ export default function ResourceCard({
   isBookmarked = false,
   uploadDate
 }: ResourceCardProps) {
-  const { colorMode } = useColorMode();
-
   return (
-    <Box
-      bg={colorMode === 'light' ? 'white' : 'gray.800'}
-      borderRadius="xl"
-      border="1px"
-      borderColor={colorMode === 'light' ? 'gray.200' : 'gray.700'}
-      p={6}
-      cursor="pointer"
-      transition="all 0.2s"
-      _hover={{
-        transform: 'translateY(-2px)',
-        shadow: 'lg',
-        borderColor: colorMode === 'light' ? 'gray.300' : 'gray.600'
+    <Paper
+      elevation={2}
+      sx={{
+        borderRadius: 3,
+        p: 3,
+        cursor: 'pointer',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: 6,
+        },
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
       }}
     >
-      <VStack align="stretch" gap="4">
-        {/* Header */}
-        <Flex justify="space-between" align="start">
-          <Badge colorScheme="blue" borderRadius="full" px={3} py={1}>
-            {category}
-          </Badge>
-          <HStack gap="2">
-            <IconButton
-              aria-label="Bookmark"
-              icon={<BookmarkIcon />}
-              size="sm"
-              variant="ghost"
-              color={isBookmarked ? 'blue.500' : 'gray.400'}
-            />
-            <IconButton
-              aria-label="Like"
-              icon={isLiked ? <HeartSolidIcon /> : <HeartIcon />}
-              size="sm"
-              variant="ghost"
-              color={isLiked ? 'red.500' : 'gray.400'}
-            />
-          </HStack>
-        </Flex>
+      {/* Header */}
+      <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+        <Chip
+          label={category}
+          color="primary"
+          size="small"
+          sx={{ borderRadius: '999px', fontWeight: 600, px: 1.5, py: 0.5 }}
+        />
+        <Stack direction="row" spacing={1}>
+          <IconButton size="small" color={isBookmarked ? 'primary' : 'default'}>
+            {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
+          </IconButton>
+          <IconButton size="small" color={isLiked ? 'error' : 'default'}>
+            {isLiked ? <FaHeart /> : <FaRegHeart />}
+          </IconButton>
+        </Stack>
+      </Box>
 
-        {/* Content */}
-        <VStack align="stretch" gap={3}>
-          <Text fontSize="lg" fontWeight="bold" lineHeight="short">
-            {title}
-          </Text>
-          <Text 
-            fontSize="sm" 
-            color={colorMode === 'light' ? 'gray.600' : 'gray.400'}
-            lineHeight="base"
-            // noOfLines={2}
-          >
-            {description}
-          </Text>
-        </VStack>
+      {/* Content */}
+      <Box>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
+          {title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          {description}
+        </Typography>
+      </Box>
 
-        {/* Tags */}
-        <Flex wrap="wrap" gap={2}>
-          {tags.map((tag, index) => (
-            <Badge
-              key={index}
-              variant="subtle"
-              colorScheme="gray"
-              fontSize="xs"
-              borderRadius="full"
-              px={2}
-              py={1}
-            >
-              {tag}
-            </Badge>
-          ))}
-        </Flex>
+      {/* Tags */}
+      <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
+        {tags.map((tag, idx) => (
+          <Chip
+            key={idx}
+            label={tag}
+            size="small"
+            variant="outlined"
+            sx={{ borderRadius: '999px', fontSize: 12, mb: 0.5 }}
+          />
+        ))}
+      </Stack>
 
-        {/* Footer */}
-        <Flex justify="space-between" align="center" pt={2}>
-          <HStack gap={3}>
-            <Avatar size="xs" name={author} src={authorAvatar} />
-            <VStack align="start" gap={0}>
-              <Text fontSize="xs" fontWeight="medium">
-                {author}
-              </Text>
-              <Text fontSize="xs" color="gray.500">
-                {uploadDate}
-              </Text>
-            </VStack>
-          </HStack>
+      {/* Footer */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" pt={1}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Avatar src={authorAvatar} alt={author} sx={{ width: 28, height: 28 }} />
+          <Box>
+            <Typography variant="caption" fontWeight={500}>
+              {author}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" display="block">
+              {uploadDate}
+            </Typography>
+          </Box>
+        </Stack>
+        <Stack direction="row" spacing={2} alignItems="center" color="text.secondary">
+          <Stack direction="row" spacing={0.5} alignItems="center">
+            <FaEye size={14} />
+            <Typography variant="caption">{views}</Typography>
+          </Stack>
+          <Stack direction="row" spacing={0.5} alignItems="center">
+            <FaHeart size={13} />
+            <Typography variant="caption">{likes}</Typography>
+          </Stack>
+          <Stack direction="row" spacing={0.5} alignItems="center">
+            <FaArrowDown size={13} />
+            <Typography variant="caption">{downloads}</Typography>
+          </Stack>
+        </Stack>
+      </Box>
 
-          <HStack gap={4} fontSize="xs" color="gray.500">
-            <HStack gap={1}>
-              <Icon as={EyeIcon} boxSize={3} />
-              <Text>{views}</Text>
-            </HStack>
-            <HStack gap={1}>
-              <Icon as={HeartIcon} boxSize={3} />
-              <Text>{likes}</Text>
-            </HStack>
-            <HStack gap={1}>
-              <Icon as={ArrowDownTrayIcon} boxSize={3} />
-              <Text>{downloads}</Text>
-            </HStack>
-          </HStack>
-        </Flex>
-
-        {/* Action Button */}
-        <Button
-          colorScheme="blue"
-          size="sm"
-          borderRadius="lg"
-        >
-          <ArrowDownTrayIcon width={16} height={16} style={{ marginRight: 8 }} />
-          Download Resource
-        </Button>
-      </VStack>
-    </Box>
+      {/* Action Button */}
+      <Button
+        variant="contained"
+        color="primary"
+        size="small"
+        sx={{ borderRadius: 2, mt: 2, alignSelf: 'flex-end' }}
+        startIcon={<FaArrowDown />}
+      >
+        Download Resource
+      </Button>
+    </Paper>
   );
 }

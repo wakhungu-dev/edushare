@@ -1,14 +1,9 @@
 'use client';
 
-import {
-  Box,
-  Text,
-  Flex,
-  Icon,
-  VStack,
-  } from '@chakra-ui/react';
-import { useColorMode } from './color-mode';
-//   import { useColorMode } from '@components/ui/colorMode';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 
 interface StatsCardProps {
   title: string;
@@ -16,60 +11,65 @@ interface StatsCardProps {
   icon: React.ElementType;
   change?: string;
   changeType?: 'increase' | 'decrease';
-  color?: string;
+  color?: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info' | string;
 }
 
 export default function StatsCard({
   title,
   value,
-  icon,
+  icon: Icon,
   change,
   changeType = 'increase',
-  color = 'blue'
+  color = 'primary'
 }: StatsCardProps) {
-  const { colorMode } = useColorMode();
-
   return (
-    <Box
-      bg={colorMode === 'light' ? 'white' : 'gray.800'}
-      borderRadius="xl"
-      border="1px"
-      borderColor={colorMode === 'light' ? 'gray.200' : 'gray.700'}
-      p={6}
-      transition="all 0.2s"
-      _hover={{
-        transform: 'translateY(-1px)',
-        shadow: 'md'
+    <Paper
+      elevation={3}
+      sx={{
+        borderRadius: 3,
+        p: 3,
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: 6,
+        },
+        bgcolor: 'background.paper',
       }}
     >
-      <Flex justify="space-between" align="start">
-        <VStack align="start" gap={3} flex={1}>
-          <Text fontSize="sm" color="gray.500" fontWeight="medium">
+      <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+        <Stack spacing={1} flex={1}>
+          <Typography variant="body2" color="text.secondary" fontWeight={500}>
             {title}
-          </Text>
-          <Text fontSize="2xl" fontWeight="bold">
+          </Typography>
+          <Typography variant="h5" fontWeight="bold">
             {value}
-          </Text>
+          </Typography>
           {change && (
-            <Text
-              fontSize="sm"
-              color={changeType === 'increase' ? 'green.500' : 'red.500'}
-              fontWeight="medium"
+            <Typography
+              variant="body2"
+              fontWeight={500}
+              color={changeType === 'increase' ? 'success.main' : 'error.main'}
             >
-              {changeType === 'increase' ? '+' : '-'}{change}
-            </Text>
+              {changeType === 'increase' ? '+' : '-'}
+              {change}
+            </Typography>
           )}
-        </VStack>
-        
+        </Stack>
         <Box
-          p={3}
-          borderRadius="lg"
-          bg={`${color}.50`}
-          color={`${color}.500`}
+          sx={{
+            p: 1.5,
+            borderRadius: 2,
+            bgcolor: `${color}.100`,
+            color: `${color}.main`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            ml: 2,
+          }}
         >
-          <Icon as={icon} boxSize={6} />
+          <Icon size={28} />
         </Box>
-      </Flex>
-    </Box>
+      </Box>
+    </Paper>
   );
 }
