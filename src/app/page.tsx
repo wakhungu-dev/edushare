@@ -9,9 +9,10 @@ import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import { FaBookOpen, FaUsers, FaArrowDown, FaStar } from 'react-icons/fa';
 import Header from '@/components/layout/Header';
-// import Sidebar from '@/components/layout/Sidebar';
+import Sidebar from '@/components/layout/Sidebar';
 import ResourceCard from '@/components/ui/ResourceCard';
 import StatsCard from '@/components/ui/StatsCard';
+import React from 'react';
 
 // Sample data
 const sampleResources = [
@@ -62,14 +63,18 @@ const sampleResources = [
     uploadDate: "5 days ago"
   }
 ];
-
 export default function Home() {
+  function showAllResources(): void {
+    throw new Error('Function not implemented.');
+  }
+  
+
   return (
     <Box minHeight="100vh" bgcolor="grey.100">
       <Header />
 
       <Box display="flex">
-        {/* <Sidebar /> */}
+        <Sidebar />
 
         <Box flex={1} p={4}>
           <Container maxWidth="lg">
@@ -131,14 +136,14 @@ export default function Home() {
               {/* Section Header */}
               <Box display="flex" justifyContent="space-between" alignItems="center" mt={4}>
                 <Box>
-                  <Typography variant="h6" fontWeight="bold">
+                  <Typography variant="h6" fontWeight="bold" fontcolor="text.primary">
                     Trending Resources
                   </Typography>
                   <Typography color="text.secondary" variant="body2">
                     Most popular resources this week
                   </Typography>
                 </Box>
-                <Button variant="text" size="small">
+                <Button variant="text" size="small" onClick={showAllResources}>
                   View All
                 </Button>
               </Box>
@@ -158,7 +163,13 @@ export default function Home() {
 
               {/* Load More */}
               <Box display="flex" justifyContent="center" pt={2}>
-                <Button variant="contained" color="primary" size="large" sx={{ borderRadius: 3 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  sx={{ borderRadius: 3 }}
+                  onClick={showAllResources}
+                >
                   Load More Resources
                 </Button>
               </Box>
@@ -169,3 +180,4 @@ export default function Home() {
     </Box>
   );
 }
+
