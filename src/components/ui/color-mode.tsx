@@ -1,15 +1,13 @@
 "use client"
 
-import type { IconButtonProps, SpanProps } from "@chakra-ui/react"
-import { ClientOnly, IconButton, Skeleton, Span } from "@chakra-ui/react"
+import type { ButtonHTMLAttributes, HTMLAttributes } from "react"
 import { ThemeProvider, useTheme } from "next-themes"
 import type { ThemeProviderProps } from "next-themes"
 import * as React from "react"
 import { LuMoon, LuSun } from "react-icons/lu"
+import { motion, AnimatePresence } from "framer-motion"
 
-export interface ColorModeProviderProps extends ThemeProviderProps {}
-
-export function ColorModeProvider(props: ColorModeProviderProps) {
+export function ColorModeProvider(props: ThemeProviderProps) {
   return (
     <ThemeProvider attribute="class" disableTransitionOnChange {...props} />
   )
@@ -46,63 +44,79 @@ export function ColorModeIcon() {
   return colorMode === "dark" ? <LuMoon /> : <LuSun />
 }
 
-interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {}
-
 export const ColorModeButton = React.forwardRef<
   HTMLButtonElement,
-  ColorModeButtonProps
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label">
 >(function ColorModeButton(props, ref) {
   const { toggleColorMode } = useColorMode()
+  const [isClient, setIsClient] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   return (
-    <ClientOnly fallback={<Skeleton boxSize="8" />}>
-      <IconButton
-        onClick={toggleColorMode}
-        variant="ghost"
-        aria-label="Toggle color mode"
-        size="sm"
-        ref={ref}
-        {...props}
-        css={{
-          _icon: {
-            width: "5",
-            height: "5",
-          },
-        }}
-      >
-        <ColorModeIcon />
-      </IconButton>
-    </ClientOnly>
+    <>
+      {!isClient ? (
+        <div className="w-8 h-8 rounded-full bg-gray-200" />
+      ) : (
+        <motion.button
+          ref={ref}
+          onClick={toggleColorMode}
+          aria-label="Toggle color mode"
+          className="
+            bg-transparent border-none cursor-pointer 
+            w-8 h-8 rounded-full flex items-center justify-center
+            hover:bg-gray-100 dark:hover:bg-gray-700
+            transition-colors duration-200
+          "
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          // Only spread props that are safe for motion.button
+          {...Object.fromEntries(
+            Object.entries(props).filter(
+              ([key]) => !key.startsWith("onDrag")
+            )
+          )}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={isClient ? "loaded" : "loading"}
+              initial={{ opacity: 0, rotate: -90 }}
+              animate={{ opacity: 1, rotate: 0 }}
+              exit={{ opacity: 0, rotate: 90 }}
+              transition={{ duration: 0.2 }}
+              className="text-lg"
+            >
+              <ColorModeIcon />
+            </motion.span>
+          </AnimatePresence>
+        </motion.button>
+      )}
+    </>
   )
 })
 
-export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(
+export const LightMode = React.forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
   function LightMode(props, ref) {
     return (
-      <Span
-        color="fg"
-        display="contents"
-        className="chakra-theme light"
-        colorPalette="gray"
-        colorScheme="light"
+      <span
         ref={ref}
+        className="chakra-theme light contents"
         {...props}
       />
     )
-  },
+  }
 )
 
-export const DarkMode = React.forwardRef<HTMLSpanElement, SpanProps>(
+export const DarkMode = React.forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
   function DarkMode(props, ref) {
     return (
-      <Span
-        color="fg"
-        display="contents"
-        className="chakra-theme dark"
-        colorPalette="gray"
-        colorScheme="dark"
+      <span
         ref={ref}
+        className="chakra-theme dark contents"
         {...props}
       />
     )
-  },
+  }
 )

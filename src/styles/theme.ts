@@ -1,95 +1,35 @@
-import { extendTheme, type ThemeConfig } from '@chakra-ui/react';
-import type { StyleFunctionProps } from '@chakra-ui/theme-tools';
-// import type { StyleFunctionProps } from './theme-tools'; 
-
-const config: ThemeConfig = {
-  initialColorMode: 'light',
-  useSystemColorMode: false,
-};
-
-export const theme = extendTheme({
-  config,
-  fonts: {
-    heading: 'var(--font-geist-sans)',
-    body: 'var(--font-geist-sans)',
-  },
+// theme.ts
+export const theme = {
   colors: {
     brand: {
-      50: '#f0f9ff',
-      100: '#e0f2fe',
-      200: '#bae6fd',
-      300: '#7dd3fc',
-      400: '#38bdf8',
-      500: '#0ea5e9',
-      600: '#0284c7',
-      700: '#0369a1',
-      800: '#075985',
-      900: '#0c4a6e',
+      50: 'var(--brand-50)',
+      100: 'var(--brand-100)',
+      200: 'var(--brand-200)',
+      300: 'var(--brand-300)',
+      400: 'var(--brand-400)',
+      500: 'var(--brand-500)',
+      600: 'var(--brand-600)',
+      700: 'var(--brand-700)',
+      800: 'var(--brand-800)',
+      900: 'var(--brand-900)',
     },
     modes: {
       teen: {
-        primary: '#9B59B6',
-        secondary: '#1ABC9C',
-        accent: '#E74C3C',
-        background: '#F8F9FA',
-        surface: '#FFFFFF',
-        text: '#2C3E50',
+        primary: 'var(--teen-primary)',
+        secondary: 'var(--teen-secondary)',
+        accent: 'var(--teen-accent)',
+        background: 'var(--teen-background)',
+        surface: 'var(--teen-surface)',
+        text: 'var(--teen-text)',
       },
       university: {
-        primary: '#3498DB',
-        secondary: '#2ECC71',
-        accent: '#F39C12',
-        background: '#FAFBFC',
-        surface: '#FFFFFF',
-        text: '#34495E',
+        primary: 'var(--university-primary)',
+        secondary: 'var(--university-secondary)',
+        accent: 'var(--university-accent)',
+        background: 'var(--university-background)',
+        surface: 'var(--university-surface)',
+        text: 'var(--university-text)',
       }
     }
   },
-  components: {
-    Button: {
-      defaultProps: {
-        colorScheme: 'brand',
-      },
-      variants: {
-        solid: {
-          borderRadius: 'lg',
-          fontWeight: 'semibold',
-        },
-        ghost: {
-          borderRadius: 'lg',
-        },
-      },
-    },
-    Card: {
-      baseStyle: {
-        container: {
-          borderRadius: 'xl',
-          border: '1px solid',
-          borderColor: 'gray.200',
-          _dark: {
-            borderColor: 'gray.700',
-          },
-        },
-      },
-    },
-    Badge: {
-      variants: {
-        subtle: {
-          borderRadius: 'full',
-          px: 3,
-          py: 1,
-          fontSize: 'xs',
-          fontWeight: 'medium',
-        },
-      },
-    },
-  },
-  styles: {
-    global: (props: StyleFunctionProps) => ({
-      body: {
-        bg: props.colorMode === 'dark' ? 'gray.900' : 'gray.50',
-        color: props.colorMode === 'dark' ? 'white' : 'gray.800',
-      },
-    }),
-  },
-});
+};
